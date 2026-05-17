@@ -34,7 +34,7 @@ Vitest is the frontend test framework. Name tests `*.test.ts` and colocate them 
 
 ## Commit & Pull Request Guidelines
 
-Current history uses concise imperative commits, for example `Add agent workflow instructions`. Keep one logical change per commit. Before committing, run relevant checks and inspect `git status`. PRs should include a short summary, test results, linked issues if any, and screenshots for UI changes.
+Use Korean commit messages and follow the Conventional Commits style: start with a type such as `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, or `build:` followed by a concise Korean summary, for example `feat: 메뉴바 커밋 추천 표시 추가`. Keep one logical change per commit. Before committing, run relevant checks and inspect `git status`. PRs should include a short summary, test results, linked issues if any, and screenshots for UI changes.
 
 ## Security & Configuration Tips
 
