@@ -8,6 +8,7 @@ use tauri_plugin_notification::NotificationExt;
 const APP_CONFIG_DIR: &str = "commit-reminder";
 const KEYRING_SERVICE: &str = "com.commitreminder.desktop";
 const GEMINI_PROVIDER: &str = "gemini";
+const TRAY_ID: &str = "commit-reminder-tray";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -271,6 +272,32 @@ fn send_native_notification(app: AppHandle, title: String, body: String) -> Resu
                 Err(notification_error.to_string())
             }
         })
+}
+
+#[tauri::command]
+fn set_tray_commit_status(app: AppHandle, recommended_count: u64, dirty_count: u64) -> Result<(), String> {
+    let tray = app
+        .tray_by_id(TRAY_ID)
+        .ok_or_else(|| "tray icon is not available".to_string())?;
+    let title = if recommended_count > 0 {
+        Some(if recommended_count > 99 {
+            "99+".to_string()
+        } else {
+            recommended_count.to_string()
+        })
+    } else {
+        None
+    };
+    let tooltip = if recommended_count > 0 {
+        format!("Commit Reminder - 커밋 추천 {recommended_count}개, 변경 있음 {dirty_count}개")
+    } else if dirty_count > 0 {
+        format!("Commit Reminder - 변경 있음 {dirty_count}개")
+    } else {
+        "Commit Reminder - 커밋 추천 없음".to_string()
+    };
+
+    tray.set_title(title.as_deref()).map_err(|e| e.to_string())?;
+    tray.set_tooltip(Some(tooltip)).map_err(|e| e.to_string())
 }
 
 #[cfg(target_os = "macos")]
@@ -613,15 +640,16 @@ pub fn run() {
             set_api_key,
             ai_judge_repository,
             send_native_notification,
+            set_tray_commit_status,
         ])
         .setup(|app| {
             let show = MenuItem::with_id(app, "show", "Show Commit Reminder", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show, &quit])?;
-            let mut tray_builder = TrayIconBuilder::new()
+            let mut tray_builder = TrayIconBuilder::with_id(TRAY_ID)
                 .menu(&menu)
                 .show_menu_on_left_click(true)
-                .tooltip("Commit Reminder")
+                .tooltip("Commit Reminder - 커밋 추천 없음")
                 .on_menu_event(|app, event| match event.id().as_ref() {
                     "show" => {
                         if let Some(window) = app.get_webview_window("main") {

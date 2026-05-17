@@ -58,6 +58,12 @@ function App() {
   const dirtyRepoCount = useMemo(() => repos.filter(hasAnyChange).length, [repos]);
   const recommendedCount = useMemo(() => repos.filter((repo) => shouldNotify(repo, repo.aiJudgement)).length, [repos]);
 
+  useEffect(() => {
+    void invoke('set_tray_commit_status', { recommendedCount, dirtyCount: dirtyRepoCount }).catch((error) => {
+      console.warn('Failed to update tray commit status', error);
+    });
+  }, [dirtyRepoCount, recommendedCount]);
+
   async function bootstrap() {
     try {
       const loaded = await invoke<AppConfig>('get_config');
