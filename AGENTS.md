@@ -1,8 +1,45 @@
-# Agent Instructions
+# Repository Guidelines
 
-- 하나의 기능/버그 수정/설정 변경 단위가 끝날 때마다 커밋한다.
-- 서로 다른 작업은 한 커밋에 섞지 않는다.
-- 커밋 전에는 가능한 경우 관련 테스트/빌드를 실행한다.
-- 커밋 전에는 `git status`를 확인하고 의도한 파일만 포함한다.
-- 커밋 메시지는 작업 의도가 드러나게 작성한다.
-- 사용자가 따로 말하지 않으면 push는 작업 묶음이 끝났거나 사용자가 요청했을 때 한다.
+## Project Structure & Module Organization
+
+This repository is a Tauri 2 desktop app with a React/Vite frontend.
+
+- `src/`: React UI, shared TypeScript types, and frontend helpers.
+- `src/lib/`: frontend utility logic and Vitest tests, e.g. `recommendation.ts` and `recommendation.test.ts`.
+- `src-tauri/src/`: Rust backend commands for Git scanning, Gemini calls, keychain access, tray setup, and notifications.
+- `src-tauri/icons/`: app icon assets.
+- `src-tauri/capabilities/`: Tauri permissions.
+- `src-tauri/Info.plist`: macOS bundle metadata, including default notification alert style.
+- `dist/`, `node_modules/`, and `src-tauri/target/` are generated and should not be edited manually.
+
+## Build, Test, and Development Commands
+
+Run commands from the repository root unless noted.
+
+- `npm install`: install frontend and Tauri CLI dependencies.
+- `npm run dev`: start the Vite frontend only.
+- `npm run tauri dev`: run the full desktop app locally.
+- `npm test`: run Vitest unit tests.
+- `npm run build`: type-check and build the frontend.
+- `cd src-tauri && cargo check`: validate Rust code quickly.
+- `npm run tauri -- build --bundles app`: build the macOS `.app` bundle.
+
+## Coding Style & Naming Conventions
+
+Use TypeScript `strict` mode and React function components. Prefer small helpers in `src/lib/` for logic that can be tested outside the UI. Use camelCase for TypeScript fields and functions; Rust structs use snake_case with Serde camelCase where exposed to the frontend. Keep indentation at two spaces for TS/JSON/Markdown and four spaces via Rust defaults.
+
+## Testing Guidelines
+
+Vitest is the frontend test framework. Name tests `*.test.ts` and colocate them with the module under test. Add tests for rule, notification, and recommendation logic when behavior changes. For Rust changes, run `cargo check`; add Rust unit tests when backend logic becomes complex or pure enough to isolate.
+
+## Commit & Pull Request Guidelines
+
+Current history uses concise imperative commits, for example `Add agent workflow instructions`. Keep one logical change per commit. Before committing, run relevant checks and inspect `git status`. PRs should include a short summary, test results, linked issues if any, and screenshots for UI changes.
+
+## Security & Configuration Tips
+
+Do not commit API keys or local config. Gemini keys belong in the OS keychain or environment variables such as `GEMINI_API_KEY`. Keep sensitive files excluded from AI diff analysis.
+
+## Agent-Specific Instructions
+
+After each completed feature, bug fix, or configuration change, create a commit. Do not mix unrelated changes in one commit. Push only when the user asks or when a completed work batch should be shared.
